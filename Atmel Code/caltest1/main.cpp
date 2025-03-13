@@ -1,4 +1,4 @@
-#define F_CPU 16000000UL // 16 MHz clock frequency for Arduino Uno
+#define F_CPU 16000000UL // 16 MHz clock frequency
 #include <avr/io.h>
 #include <util/delay.h>
 #include <stdlib.h>
@@ -33,35 +33,38 @@ char Keypad_Read(void);
 void Calculator(void);
 
 int main(void) {
+	// Configure LCD pins as outputs
 	DDRB |= (1 << LCD_RS) | (1 << LCD_RW) | (1 << LCD_EN);
-	DDRC |= (1 << LCD_D4 | 1 << LCD_D5 | 1 << LCD_D6 | 1 << LCD_D7);
-	DDRD &= ~(1 << ROW1 | 1 << ROW2 | 1 << ROW3 | 1 << ROW4);
-	DDRD |= (1 << COL1 | 1 << COL2 | 1 << COL3 | 1 << COL4);
-	PORTD |= (1 << ROW1 | 1 << ROW2 | 1 << ROW3 | 1 << ROW4);
+	DDRC |= (1 << LCD_D4) | (1 << LCD_D5) | (1 << LCD_D6) | (1 << LCD_D7);
+	
+	// Configure Keypad: Rows as inputs, Columns as outputs
+	DDRD &= ~((1 << ROW1) | (1 << ROW2) | (1 << ROW3) | (1 << ROW4)); // Inputs
+	DDRD |= (1 << COL1) | (1 << COL2) | (1 << COL3) | (1 << COL4);    // Outputs
+	PORTD |= (1 << ROW1) | (1 << ROW2) | (1 << ROW3) | (1 << ROW4);   // Enable pull-ups on rows
 
 	LCD_Init();
 	LCD_String("Calculator Ready");
-	
+	_delay_ms(50);
+
 	while (1) {
 		Calculator();
 	}
 }
 
-// [LCD_Command, LCD_Data, LCD_Init, LCD_String, LCD_Clear, Keypad_Read remain unchanged...]
-
 void LCD_Command(unsigned char cmnd) {
-	PORTC &= ~(1 << LCD_D4 | 1 << LCD_D5 | 1 << LCD_D6 | 1 << LCD_D7);
+	PORTC &= ~((1 << LCD_D4) | (1 << LCD_D5) | (1 << LCD_D6) | (1 << LCD_D7));
 	if (cmnd & 0x10) PORTC |= (1 << LCD_D4);
 	if (cmnd & 0x20) PORTC |= (1 << LCD_D5);
 	if (cmnd & 0x40) PORTC |= (1 << LCD_D6);
 	if (cmnd & 0x80) PORTC |= (1 << LCD_D7);
-	PORTB &= ~(1 << LCD_RS);
-	PORTB &= ~(1 << LCD_RW);
+	PORTB &= ~(1 << LCD_RS); // Command mode
+	PORTB &= ~(1 << LCD_RW); // Write mode
 	PORTB |= (1 << LCD_EN);
 	_delay_us(1);
 	PORTB &= ~(1 << LCD_EN);
 	_delay_us(50);
-	PORTC &= ~(1 << LCD_D4 | 1 << LCD_D5 | 1 << LCD_D6 | 1 << LCD_D7);
+
+	PORTC &= ~((1 << LCD_D4) | (1 << LCD_D5) | (1 << LCD_D6) | (1 << LCD_D7));
 	if (cmnd & 0x01) PORTC |= (1 << LCD_D4);
 	if (cmnd & 0x02) PORTC |= (1 << LCD_D5);
 	if (cmnd & 0x04) PORTC |= (1 << LCD_D6);
@@ -73,18 +76,19 @@ void LCD_Command(unsigned char cmnd) {
 }
 
 void LCD_Data(unsigned char data) {
-	PORTC &= ~(1 << LCD_D4 | 1 << LCD_D5 | 1 << LCD_D6 | 1 << LCD_D7);
+	PORTC &= ~((1 << LCD_D4) | (1 << LCD_D5) | (1 << LCD_D6) | (1 << LCD_D7));
 	if (data & 0x10) PORTC |= (1 << LCD_D4);
 	if (data & 0x20) PORTC |= (1 << LCD_D5);
 	if (data & 0x40) PORTC |= (1 << LCD_D6);
 	if (data & 0x80) PORTC |= (1 << LCD_D7);
-	PORTB |= (1 << LCD_RS);
-	PORTB &= ~(1 << LCD_RW);
+	PORTB |= (1 << LCD_RS);  // Data mode
+	PORTB &= ~(1 << LCD_RW); // Write mode
 	PORTB |= (1 << LCD_EN);
 	_delay_us(1);
 	PORTB &= ~(1 << LCD_EN);
 	_delay_us(50);
-	PORTC &= ~(1 << LCD_D4 | 1 << LCD_D5 | 1 << LCD_D6 | 1 << LCD_D7);
+
+	PORTC &= ~((1 << LCD_D4) | (1 << LCD_D5) | (1 << LCD_D6) | (1 << LCD_D7));
 	if (data & 0x01) PORTC |= (1 << LCD_D4);
 	if (data & 0x02) PORTC |= (1 << LCD_D5);
 	if (data & 0x04) PORTC |= (1 << LCD_D6);
@@ -96,12 +100,12 @@ void LCD_Data(unsigned char data) {
 }
 
 void LCD_Init(void) {
-	_delay_ms(20);
-	LCD_Command(0x02);
-	LCD_Command(0x28);
-	LCD_Command(0x0C);
-	LCD_Command(0x06);
-	LCD_Command(0x01);
+	_delay_ms(20);       // Wait for LCD to power up
+	LCD_Command(0x02);   // 4-bit mode
+	LCD_Command(0x28);   // 2 lines, 5x8 font
+	LCD_Command(0x0C);   // Display on, cursor off
+	LCD_Command(0x06);   // Increment cursor
+	LCD_Command(0x01);   // Clear display
 	_delay_ms(2);
 }
 
@@ -112,169 +116,145 @@ void LCD_String(const char *str) {
 }
 
 void LCD_Clear(void) {
-	LCD_Command(0x01);
+	LCD_Command(0x01); // Clear display
 	_delay_ms(2);
 }
 
 char Keypad_Read(void) {
-	PORTD |= (1 << COL1 | 1 << COL2 | 1 << COL3 | 1 << COL4);
+	PORTD |= (1 << COL1) | (1 << COL2) | (1 << COL3) | (1 << COL4); // All columns high
+	
+	// Check Column 1
 	PORTD &= ~(1 << COL1);
 	if (!(PIND & (1 << ROW1))) { _delay_ms(50); return '7'; }
 	if (!(PIND & (1 << ROW2))) { _delay_ms(50); return '4'; }
 	if (!(PIND & (1 << ROW3))) { _delay_ms(50); return '1'; }
-	if (!(PIND & (1 << ROW4))) { _delay_ms(50); return 'O'; }
+	if (!(PIND & (1 << ROW4))) { _delay_ms(50); return 'C'; } // Clear/ON
+	
+	// Check Column 2
 	PORTD |= (1 << COL1);
 	PORTD &= ~(1 << COL2);
 	if (!(PIND & (1 << ROW1))) { _delay_ms(50); return '8'; }
 	if (!(PIND & (1 << ROW2))) { _delay_ms(50); return '5'; }
 	if (!(PIND & (1 << ROW3))) { _delay_ms(50); return '2'; }
 	if (!(PIND & (1 << ROW4))) { _delay_ms(50); return '0'; }
+	
+	// Check Column 3
 	PORTD |= (1 << COL2);
 	PORTD &= ~(1 << COL3);
 	if (!(PIND & (1 << ROW1))) { _delay_ms(50); return '9'; }
 	if (!(PIND & (1 << ROW2))) { _delay_ms(50); return '6'; }
 	if (!(PIND & (1 << ROW3))) { _delay_ms(50); return '3'; }
 	if (!(PIND & (1 << ROW4))) { _delay_ms(50); return '='; }
+	
+	// Check Column 4
 	PORTD |= (1 << COL3);
 	PORTD &= ~(1 << COL4);
 	if (!(PIND & (1 << ROW1))) { _delay_ms(50); return '/'; }
-	if (!(PIND & (1 << ROW2))) { _delay_ms(50); return 'x'; }
+	if (!(PIND & (1 << ROW2))) { _delay_ms(50); return '*'; }
 	if (!(PIND & (1 << ROW3))) { _delay_ms(50); return '-'; }
 	if (!(PIND & (1 << ROW4))) { _delay_ms(50); return '+'; }
-	PORTD |= (1 << COL4);
-	return 0;
+	
+	PORTD |= (1 << COL4); // Reset columns
+	return 0;             // No key pressed
 }
 
 void Calculator(void) {
-	char key, num1[6], num2[6], op = 0; // Limit each to 5 digits + null terminator
-	int i = 0, j = 0, pos = 0;         // pos tracks cursor position
+	char key, num1[6] = {0}, num2[6] = {0}, op = 0;
+	int i = 0, j = 0;
 	long result = 0;
 	float result_float = 0.0;
-	static char last_result[16] = "";   // Persistent result storage
+	char result_str[16] = {0};
 
-	// If there's a previous result, display it
-	if (last_result[0] != '\0') {
-		LCD_Clear();
-		LCD_String(last_result);
-		while ((key = Keypad_Read()) != 'O') {
-			_delay_ms(10);
-		}
-		while (Keypad_Read() != 0) _delay_ms(10); // Wait for key release
-	}
-
-	// Start new calculation
 	LCD_Clear();
-	pos = 0;
 
-	// Input first number (max 5 digits to fit 16-char line)
-	while ((key = Keypad_Read()) == 0) _delay_ms(10);
-	while (key != '+' && key != '-' && key != 'x' && key != '/' && key != 'O' && pos < 5) {
-		if (key >= '0' && key <= '9') {
-			LCD_Data(key);
+	// Get first number
+	while (1) {
+		key = Keypad_Read();
+		if (key && (key >= '0' && key <= '9') && i < 5) {
 			num1[i++] = key;
-			pos++;
+			LCD_Data(key);
+			while (Keypad_Read()) _delay_ms(10); // Debounce
+			} else if (key == '+' || key == '-' || key == '*' || key == '/' || key == 'C') {
+			break;
 		}
-		while ((key = Keypad_Read()) != 0) _delay_ms(10); // Debounce
-		while ((key = Keypad_Read()) == 0) _delay_ms(10); // Wait for next key
+		_delay_ms(10);
 	}
 	num1[i] = '\0';
 
-	// Check for reset
-	if (key == 'O') {
-		last_result[0] = '\0';
+	if (key == 'C') { // Reset
 		LCD_Clear();
 		LCD_String("Calculator Ready");
 		_delay_ms(1000);
 		return;
 	}
 
-	// Display and store operator
-	if (pos < 15) {
-		op = key;
-		LCD_Data(op);
-		pos++;
-		} else {
-		LCD_Clear();
-		LCD_String("Input Too Long");
-		_delay_ms(2000);
-		return;
-	}
+	// Store operator
+	op = key;
+	LCD_Data(op);
 
-	// Input second number (max 5 digits)
-	while ((key = Keypad_Read()) == 0) _delay_ms(10);
-	while (key != '=' && key != 'O' && pos < 10) { // Leave room for "=result"
-		if (key >= '0' && key <= '9') {
-			LCD_Data(key);
+	// Get second number
+	while (1) {
+		key = Keypad_Read();
+		if (key && (key >= '0' && key <= '9') && j < 5) {
 			num2[j++] = key;
-			pos++;
+			LCD_Data(key);
+			while (Keypad_Read()) _delay_ms(10); // Debounce
+			} else if (key == '=') {
+			break;
+			} else if (key == 'C') {
+			LCD_Clear();
+			LCD_String("Calculator Ready");
+			_delay_ms(1000);
+			return;
 		}
-		while ((key = Keypad_Read()) != 0) _delay_ms(10); // Debounce
-		while ((key = Keypad_Read()) == 0) _delay_ms(10); // Wait for next key
+		_delay_ms(10);
 	}
 	num2[j] = '\0';
 
-	// Check for reset
-	if (key == 'O') {
-		last_result[0] = '\0';
-		LCD_Clear();
-		LCD_String("Calculator Ready");
-		_delay_ms(1000);
-		return;
+	// Calculate result
+	long n1 = atol(num1);
+	long n2 = atol(num2);
+	LCD_Data('=');
+
+	switch (op) {
+		case '+':
+		result = n1 + n2;
+		ltoa(result, result_str, 10);
+		break;
+		case '-':
+		result = n1 - n2;
+		ltoa(result, result_str, 10);
+		break;
+		case '*':
+		result = n1 * n2;
+		ltoa(result, result_str, 10);
+		break;
+		case '/':
+		if (n2 != 0) {
+			result_float = (float)n1 / n2;
+			dtostrf(result_float, 6, 2, result_str); // 6 chars, 2 decimals
+			} else {
+			strcpy(result_str, "Error: Div by 0");
+		}
+		break;
+		default:
+		strcpy(result_str, "Error: Invalid Op");
+		break;
 	}
 
-	// Perform calculation and display result when '=' is pressed
-	if (key == '=' && pos < 15) {
-		long n1 = atol(num1);
-		long n2 = atol(num2);
+	// Display result and wait for 'C'
+	LCD_String(result_str);
 
-		LCD_Data('='); // Append '=' without clearing
-		pos++;
-
-		switch (op) {
-			case '+':
-			result = n1 + n2;
-			ltoa(result, last_result, 10);
-			break;
-			case '-':
-			result = n1 - n2;
-			ltoa(result, last_result, 10);
-			break;
-			case 'x':
-			result = n1 * n2;
-			ltoa(result, last_result, 10);
-			break;
-			case '/':
-			if (n2 != 0) {
-				result_float = (float)n1 / n2;
-				dtostrf(result_float, 5, 1, last_result); // 5 chars, 1 decimal
-				} else {
-				strcpy(last_result, "Err");
-			}
-			break;
-			default:
-			strcpy(last_result, "OpErr");
+	// Wait until 'C' is pressed to clear and reset
+	while (1) {
+		key = Keypad_Read();
+		if (key == 'C') {
+			while (Keypad_Read()) _delay_ms(10); // Debounce
+			LCD_Clear();
+			LCD_String("Calculator Ready");
+			_delay_ms(1000);
 			break;
 		}
-
-		// Append result if space allows
-		if (pos + strlen(last_result) <= 16) {
-			LCD_String(last_result);
-			} else {
-			// If result won't fit, overwrite with error
-			LCD_Command(0x80); // Move cursor to start of line
-			LCD_String("Result Too Long");
-			strcpy(last_result, "Result Too Long");
-			_delay_ms(2000);
-			return;
-		}
-
-		// Update pos after appending result
-		pos += strlen(last_result);
-		} else if (pos >= 15) {
-		LCD_Command(0x80); // Move cursor to start
-		LCD_String("Input Too Long");
-		strcpy(last_result, "Input Too Long");
-		_delay_ms(2000);
-		return;
+		_delay_ms(10);
 	}
 }
