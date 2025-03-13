@@ -1,4 +1,4 @@
-main.d main.o: .././main.cpp \
+keypad.d keypad.o: .././keypad.c .././keypad.h \
  d:\software\ install\ location\atmel\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\avr\io.h \
  d:\software\ install\ location\atmel\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\avr\sfr_defs.h \
  d:\software\ install\ location\atmel\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\inttypes.h \
@@ -12,11 +12,9 @@ main.d main.o: .././main.cpp \
  d:\software\ install\ location\atmel\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\avr\lock.h \
  d:\software\ install\ location\atmel\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h \
  d:\software\ install\ location\atmel\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay_basic.h \
- d:\software\ install\ location\atmel\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\math.h \
- d:\software\ install\ location\atmel\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\stdlib.h \
- d:\software\ install\ location\atmel\7.0\toolchain\avr8\avr8-gnu-toolchain\lib\gcc\avr\5.4.0\include\stddef.h \
- d:\software\ install\ location\atmel\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\string.h \
- .././keypad.h
+ d:\software\ install\ location\atmel\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\math.h
+
+.././keypad.h:
 
 d:\software\ install\ location\atmel\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\avr\io.h:
 
@@ -45,11 +43,3 @@ d:\software\ install\ location\atmel\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\i
 d:\software\ install\ location\atmel\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay_basic.h:
 
 d:\software\ install\ location\atmel\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\math.h:
-
-d:\software\ install\ location\atmel\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\stdlib.h:
-
-d:\software\ install\ location\atmel\7.0\toolchain\avr8\avr8-gnu-toolchain\lib\gcc\avr\5.4.0\include\stddef.h:
-
-d:\software\ install\ location\atmel\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\string.h:
-
-.././keypad.h:
